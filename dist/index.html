@@ -61,6 +61,7 @@
     .hero-media img { width:100%; height:100%; object-fit:cover; display:block; }
     .play { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:66px; height:58px; border-radius:12px; background:var(--orange); display:grid; place-items:center; color:var(--green); font-size:23px; box-shadow:0 0 0 8px rgba(230,127,22,.16); }
     section { padding:104px 0; position:relative; } h2 { margin:12px 0 20px; font:900 clamp(34px,4.5vw,57px)/1 var(--headline); text-transform:uppercase; letter-spacing:.01em; }
+    h1,h2,h3 { font-feature-settings:"ss01" 1; }
     .intro { display:grid; grid-template-columns:.7fr 1.3fr; gap:70px; align-items:start; }
     .intro p { margin:0; font-size:clamp(19px,2vw,27px); line-height:1.43; } .intro b { color:var(--orange); }
     .work { background:var(--cream); overflow:hidden; } .work-list { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; margin-top:42px; } .service { position:relative; padding:8px 0 8px 26px; border-left:2px solid var(--orange); } .service .number { display:block; color:var(--orange); font:900 13px/1 var(--headline); margin-bottom:12px; letter-spacing:.08em; } .service h3 { font:900 26px/1.05 var(--headline); text-transform:uppercase; margin:0 0 12px; } .service p { font-size:15px; line-height:1.5; margin:0; max-width:300px; }
@@ -109,16 +110,6 @@
   </main>
   <footer id="contact"><div class="wrap"><div class="foot"><div><a class="brand" href="#top" aria-label="VUZOL"><img src="assets/vuzol-logo-light-cropped.png" alt="VUZOL"></a><p>Медіа про історію української музики, що єднає.</p></div><div><span class="eyebrow">Зав’яжемо розмову?</span><p>Маєте ідею для спільного проєкту, хочете запропонувати співпрацю або просто написати нам? Будемо раді поспілкуватися.</p><p class="contact"><a href="mailto:vuzolmedia@gmail.com">vuzolmedia@gmail.com</a></p><p class="footer-socials"><a href="https://www.instagram.com/vuzol.media/" target="_blank" rel="noreferrer">Instagram</a><a href="https://www.youtube.com/@vuzolmedia" target="_blank" rel="noreferrer">YouTube</a><a href="https://www.tiktok.com/@vuzol.media" target="_blank" rel="noreferrer">TikTok</a><a href="https://www.threads.com/@vuzol.media" target="_blank" rel="noreferrer">Threads</a></p><a class="button cream" href="mailto:vuzolmedia@gmail.com">Написати нам</a></div></div><div class="legal"><span>© VUZOL · 2026 · Сплітаємо музикою та її історією</span><a href="https://promedia.report" target="_blank" rel="noreferrer">Сайт створено ГО «ПроМедіа» у 2026 році</a></div></div></footer>
   <script>
-    // In display headings use the VUZOL visual convention: 3 instead of З/з.
-    document.querySelectorAll('h1, h2, h3').forEach((heading) => {
-      const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
-      const nodes = [];
-      while (walker.nextNode()) nodes.push(walker.currentNode);
-      nodes.forEach((node) => {
-        if (!/[Зз]/.test(node.nodeValue)) return;
-        node.nodeValue = node.nodeValue.replace(/[Зз]/g, '3');
-      });
-    });
     document.querySelectorAll('[data-carousel]').forEach((carousel) => {
       const slides = [...carousel.querySelectorAll('.event-slide')];
       let current = 0;
