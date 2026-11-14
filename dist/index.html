@@ -83,8 +83,6 @@
     @media (max-width:420px) { h1 { font-size:34px; } .brand { width:126px; } .support-nav { font-size:12px; padding:8px 10px; } .hero-platforms > span { width:100%; } .social-links { gap:14px; } .social-links a { width:74px; } .button { max-width:100%; padding:13px 16px; } .collage { min-height:270px; gap:10px; } }
     @keyframes enter { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
     .hero-copy { animation:enter .65s ease-out both; } .hero-media { animation:enter .75s .12s ease-out both; }
-    /* NAMU stylises кириличну «З» як латинську Z. Keep the headline font, but draw this glyph with Fixel so Ukrainian words remain unambiguous. */
-    .ukrainian-z { font-family:"Fixel Display","Fixel Text",sans-serif; font-weight:800; font-size:.92em; letter-spacing:-.04em; }
     @supports (animation-timeline:view()) { section:not(.site-head) .wrap { animation:enter linear both; animation-timeline:view(); animation-range:entry 5% cover 28%; } }
     @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } *,*::before,*::after { transition:none!important; animation:none!important; } }
   </style>
@@ -111,25 +109,14 @@
   </main>
   <footer id="contact"><div class="wrap"><div class="foot"><div><a class="brand" href="#top" aria-label="VUZOL"><img src="assets/vuzol-logo-light-cropped.png" alt="VUZOL"></a><p>Медіа про історію української музики, що єднає.</p></div><div><span class="eyebrow">Зав’яжемо розмову?</span><p>Маєте ідею для спільного проєкту, хочете запропонувати співпрацю або просто написати нам? Будемо раді поспілкуватися.</p><p class="contact"><a href="mailto:vuzolmedia@gmail.com">vuzolmedia@gmail.com</a></p><p class="footer-socials"><a href="https://www.instagram.com/vuzol.media/" target="_blank" rel="noreferrer">Instagram</a><a href="https://www.youtube.com/@vuzolmedia" target="_blank" rel="noreferrer">YouTube</a><a href="https://www.tiktok.com/@vuzol.media" target="_blank" rel="noreferrer">TikTok</a><a href="https://www.threads.com/@vuzol.media" target="_blank" rel="noreferrer">Threads</a></p><a class="button cream" href="mailto:vuzolmedia@gmail.com">Написати нам</a></div></div><div class="legal"><span>© VUZOL · 2026 · Сплітаємо музикою та її історією</span><a href="https://promedia.report" target="_blank" rel="noreferrer">Сайт створено ГО «ПроМедіа» у 2026 році</a></div></div></footer>
   <script>
-    // Preserve the NAMU display face while making every Ukrainian З/з in headings readable.
+    // In display headings use the VUZOL visual convention: 3 instead of З/з.
     document.querySelectorAll('h1, h2, h3').forEach((heading) => {
       const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
       const nodes = [];
       while (walker.nextNode()) nodes.push(walker.currentNode);
       nodes.forEach((node) => {
         if (!/[Зз]/.test(node.nodeValue)) return;
-        const fragment = document.createDocumentFragment();
-        node.nodeValue.split(/([Зз])/).forEach((part) => {
-          if (part === 'З' || part === 'з') {
-            const glyph = document.createElement('span');
-            glyph.className = 'ukrainian-z';
-            glyph.textContent = part;
-            fragment.append(glyph);
-          } else if (part) {
-            fragment.append(document.createTextNode(part));
-          }
-        });
-        node.replaceWith(fragment);
+        node.nodeValue = node.nodeValue.replace(/[Зз]/g, '3');
       });
     });
     document.querySelectorAll('[data-carousel]').forEach((carousel) => {
