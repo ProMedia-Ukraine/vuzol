@@ -3,6 +3,8 @@ name: Deploy VUZOL to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: '17 */6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -29,6 +31,31 @@ jobs:
           unzip -q /tmp/vuzol-site-dist.zip -d "$RUNNER_TEMP/source"
           test -f "$RUNNER_TEMP/source/dist/index.html"
           mv "$RUNNER_TEMP/source/dist" "$RUNNER_TEMP/public"
+
+      - name: Refresh Instagram materials
+        if: ${{ secrets.INSTAGRAM_ACCESS_TOKEN != '' && vars.INSTAGRAM_BUSINESS_ACCOUNT_ID != '' }}
+        env:
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ vars.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+        run: |
+          curl --fail --silent --show-error --get \
+            "https://graph.facebook.com/v27.0/${INSTAGRAM_BUSINESS_ACCOUNT_ID}/media" \
+            --data-urlencode "fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp" \
+            --data-urlencode "limit=6" \
+            --data-urlencode "access_token=${INSTAGRAM_ACCESS_TOKEN}" \
+            --output "$RUNNER_TEMP/instagram-response.json"
+          node <<'NODE'
+          const fs = require('fs');
+          const payload = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/instagram-response.json', 'utf8'));
+          const fields = ['id', 'caption', 'media_type', 'media_url', 'thumbnail_url', 'permalink', 'timestamp'];
+          const posts = (payload.data || []).slice(0, 6).map((post) =>
+            Object.fromEntries(fields.filter((field) => post[field] !== undefined).map((field) => [field, post[field]]))
+          );
+          fs.writeFileSync(
+            process.env.RUNNER_TEMP + '/public/assets/instagram-feed.json',
+            JSON.stringify(posts)
+          );
+          NODE
 
       - uses: actions/configure-pages@v5
 
