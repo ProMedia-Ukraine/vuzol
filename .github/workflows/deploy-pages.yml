@@ -57,6 +57,31 @@ jobs:
           );
           NODE
 
+      - name: Report Instagram token expiry
+        if: ${{ env.INSTAGRAM_ACCESS_TOKEN != '' }}
+        continue-on-error: true
+        run: |
+          python3 - <<'PY'
+          import json, os, time, urllib.parse, urllib.request
+          t = os.environ["INSTAGRAM_ACCESS_TOKEN"]
+          q = urllib.parse.urlencode({"input_token": t, "access_token": t})
+          d = json.load(urllib.request.urlopen("https://graph.facebook.com/debug_token?" + q, timeout=30))["data"]
+          def fmt(ts):
+              if not ts:
+                  return "не закінчується"
+              days = int((ts - time.time()) // 86400)
+              return "%s (через %d дн.)" % (time.strftime("%Y-%m-%d", time.gmtime(ts)), days)
+          lines = [
+              "Тип ключа: %s" % d.get("type", "?"),
+              "Ключ дійсний: %s" % ("так" if d.get("is_valid") else "НІ"),
+              "Ключ діє до: %s" % fmt(d.get("expires_at")),
+              "Доступ до даних діє до: %s" % fmt(d.get("data_access_expires_at")),
+          ]
+          print("\n".join(lines))
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write("### Ключ Instagram\n\n" + "\n".join("- " + l for l in lines) + "\n")
+          PY
+
       - name: Fetch (Не)знищені Instagram post image
         if: ${{ env.INSTAGRAM_ACCESS_TOKEN != '' && env.INSTAGRAM_BUSINESS_ACCOUNT_ID != '' }}
         continue-on-error: true
