@@ -62,10 +62,15 @@ jobs:
         continue-on-error: true
         run: |
           python3 - <<'PY'
-          import json, os, time, urllib.parse, urllib.request
+          import json, os, time, urllib.error, urllib.parse, urllib.request
           t = os.environ["INSTAGRAM_ACCESS_TOKEN"]
           q = urllib.parse.urlencode({"input_token": t, "access_token": t})
-          d = json.load(urllib.request.urlopen("https://graph.facebook.com/debug_token?" + q, timeout=30))["data"]
+          try:
+              d = json.load(urllib.request.urlopen("https://graph.facebook.com/debug_token?" + q, timeout=30))["data"]
+          except urllib.error.HTTPError as e:
+              err = json.load(e).get("error", {})
+              print("debug_token error:", err.get("type"), err.get("code"), err.get("message"))
+              raise SystemExit(0)
           def fmt(ts):
               if not ts:
                   return "не закінчується"
