@@ -57,6 +57,30 @@ jobs:
           );
           NODE
 
+      - name: Install compact Instagram preview cards
+        run: |
+          mkdir -p "$RUNNER_TEMP/public/assets"
+          cp .github/scripts/instagram-cards.css "$RUNNER_TEMP/public/assets/instagram-cards.css"
+          cp .github/scripts/instagram-cards.js "$RUNNER_TEMP/public/assets/instagram-cards.js"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          import re
+          html = Path(os.environ["RUNNER_TEMP"]) / "public" / "index.html"
+          content = html.read_text(encoding="utf-8")
+          css = '<link rel="stylesheet" href="assets/instagram-cards.css">'
+          js = '<script defer src="assets/instagram-cards.js"></script>'
+          if css not in content:
+              content, n = re.subn(r"</head\s*>", lambda m: css + "\n" + m.group(0), content, count=1, flags=re.I)
+              if n != 1:
+                  raise SystemExit("Cannot locate </head> to inject Instagram styles")
+          if js not in content:
+              content, n = re.subn(r"</body\s*>", lambda m: js + "\n" + m.group(0), content, count=1, flags=re.I)
+              if n != 1:
+                  raise SystemExit("Cannot locate </body> to inject Instagram cards")
+          html.write_text(content, encoding="utf-8")
+          PY
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
