@@ -22,6 +22,29 @@
     .replace(/\s+/g, ' ')
     .trim();
 
+  const trimAtWord = (value, limit) => {
+    if (value.length <= limit) return value;
+    const part = value.slice(0, limit + 1);
+    const space = part.lastIndexOf(' ');
+    return (space > limit * .55 ? part.slice(0, space) : part.slice(0, limit)).trim();
+  };
+  const titleAndSummary = (caption) => {
+    const raw = String(caption || '').replace(/\r/g, '').trim();
+    const lines = raw.split(/\n+/).map(normalize).filter(Boolean);
+    const full = normalize(raw);
+    if (!full) return {title: 'Матеріал VUZOL', summary: 'Переглянути публікацію в Instagram'};
+    let lead = lines[0] || full;
+    if (lead.length > 85) {
+      const sentence = lead.match(/^.{15,85}?[.!?…](?=\s|$)/u);
+      if (sentence) lead = sentence[0];
+    }
+    const title = trimAtWord(lead, 85);
+    const remainder = full.startsWith(title)
+      ? full.slice(title.length).trim().replace(/^[.!?…,:;\s–—-]+/u, '')
+      : full;
+    return {title, summary: trimAtWord(remainder, 190)};
+  };
+
   async function start() {
     let response;
     try {
@@ -50,12 +73,21 @@
         image.loading = 'lazy';
         image.decoding = 'async';
 
-        const description = document.createElement('p');
-        description.className = 'vuzol-ig-description';
-        description.textContent = normalize(post.caption).slice(0, 150) ||
-          'Дивитися матеріал VUZOL в Instagram';
+        const {title, summary} = titleAndSummary(post.caption);
+        const copy = document.createElement('div');
+        copy.className = 'vuzol-ig-copy';
+        const heading = document.createElement('h3');
+        heading.className = 'vuzol-ig-title';
+        heading.textContent = title;
+        copy.appendChild(heading);
+        if (summary) {
+          const description = document.createElement('p');
+          description.className = 'vuzol-ig-description';
+          description.textContent = summary;
+          copy.appendChild(description);
+        }
 
-        const children = [image, description];
+        const children = [image, copy];
         if (post.media_type === 'VIDEO') {
           const badge = document.createElement('span');
           badge.className = 'vuzol-ig-video-badge';
