@@ -1,0 +1,40 @@
+name: Deploy VUZOL to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore static site
+        run: |
+          cat vuzol-site-dist.zip.part-000 vuzol-site-dist.zip.part-001 > /tmp/vuzol-site-dist.zip
+          unzip -q /tmp/vuzol-site-dist.zip -d "$RUNNER_TEMP/source"
+          test -f "$RUNNER_TEMP/source/dist/index.html"
+          mv "$RUNNER_TEMP/source/dist" "$RUNNER_TEMP/public"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/public
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
