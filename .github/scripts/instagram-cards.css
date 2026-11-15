@@ -1,0 +1,75 @@
+/* Scoped styles for the six Instagram cards in the VUZOL materials section. */
+a[data-vuzol-instagram-card="true"] {
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+  overflow: hidden !important;
+  border-radius: 16px !important;
+  background: #f6f1eb !important;
+  text-decoration: none !important;
+  box-sizing: border-box !important;
+}
+a[data-vuzol-instagram-card="true"]::before,
+a[data-vuzol-instagram-card="true"]::after {
+  content: none !important;
+  display: none !important;
+}
+a[data-vuzol-instagram-card="true"] .vuzol-ig-image {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 4 / 5 !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+a[data-vuzol-instagram-card="true"] .vuzol-ig-description {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden !important;
+  color: #173e37 !important;
+  font-size: clamp(13px, 1.1vw, 15px) !important;
+  line-height: 1.5 !important;
+  font-weight: 500 !important;
+  padding: 12px 14px 14px !important;
+  margin: 0 !important;
+  white-space: normal !important;
+  text-transform: none !important;
+  min-height: 3.5em;
+}
+a[data-vuzol-instagram-card="true"] .vuzol-ig-video-badge {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  background: rgba(0, 45, 39, .75) !important;
+  color: white !important;
+  border-radius: 50% !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  pointer-events: none !important;
+}
+/* Existing grid/card wrappers must not force an enormous square overlay. */
+a[data-vuzol-instagram-card="true"] > * { flex-shrink: 0; }
+@media (max-width: 767px) {
+  a[data-vuzol-instagram-card="true"] { border-radius: 12px !important; }
+  a[data-vuzol-instagram-card="true"] .vuzol-ig-description {
+    font-size: 13px !important;
+    padding: 9px 10px 12px !important;
+  }
+}
