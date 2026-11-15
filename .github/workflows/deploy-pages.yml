@@ -121,3 +121,17 @@ jobs:
 
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  keepalive:
+    # GitHub disables scheduled workflows in public repositories after 60 days
+    # without commits. Re-enabling the workflow resets that counter, so the
+    # Instagram refresh keeps running even when the site itself is not edited.
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Keep scheduled updates enabled
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/deploy-pages.yml/enable" && echo "Scheduled updates kept enabled"
