@@ -57,6 +57,37 @@ jobs:
           );
           NODE
 
+      - name: Fetch (Не)знищені Instagram post image
+        if: ${{ env.INSTAGRAM_ACCESS_TOKEN != '' && env.INSTAGRAM_BUSINESS_ACCOUNT_ID != '' }}
+        continue-on-error: true
+        env:
+          RESEARCH_POST_SHORTCODE: DdRP21WgJcL
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.parse, urllib.request
+          token = os.environ["INSTAGRAM_ACCESS_TOKEN"]
+          account = os.environ["INSTAGRAM_BUSINESS_ACCOUNT_ID"]
+          code = os.environ["RESEARCH_POST_SHORTCODE"]
+          fields = "permalink,media_type,media_url,thumbnail_url,children{media_type,media_url,thumbnail_url}"
+          url = "https://graph.facebook.com/v27.0/%s/media?%s" % (account, urllib.parse.urlencode({"fields": fields, "limit": 100, "access_token": token}))
+          post = None
+          for _ in range(5):
+              data = json.load(urllib.request.urlopen(url, timeout=30))
+              post = next((m for m in data.get("data", []) if "/" + code + "/" in m.get("permalink", "")), None)
+              url = data.get("paging", {}).get("next")
+              if post or not url:
+                  break
+          if not post:
+              raise SystemExit("Research post %s not found" % code)
+          item = (post.get("children", {}).get("data") or [post])[0]
+          image = item.get("thumbnail_url") if item.get("media_type") == "VIDEO" else item.get("media_url")
+          if not image:
+              raise SystemExit("No image URL for research post")
+          target = os.path.join(os.environ["RUNNER_TEMP"], "public", "assets", "research-nezyshcheni.jpg")
+          urllib.request.urlretrieve(image, target)
+          print("Saved", target, os.path.getsize(target), "bytes")
+          PY
+
       - name: Install compact Instagram preview cards
         run: |
           mkdir -p "$RUNNER_TEMP/public/assets"
