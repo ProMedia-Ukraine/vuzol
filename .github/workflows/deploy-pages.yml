@@ -68,8 +68,9 @@ jobs:
           import re
           html = Path(os.environ["RUNNER_TEMP"]) / "public" / "index.html"
           content = html.read_text(encoding="utf-8")
-          css = '<link rel="stylesheet" href="assets/instagram-cards.css">'
-          js = '<script defer src="assets/instagram-cards.js"></script>'
+          version = os.environ.get("GITHUB_SHA", "current")[:12]
+          css = f'<link rel="stylesheet" href="assets/instagram-cards.css?v={version}">'
+          js = f'<script defer src="assets/instagram-cards.js?v={version}"></script>'
           if css not in content:
               content, n = re.subn(r"</head\s*>", lambda m: css + "\n" + m.group(0), content, count=1, flags=re.I)
               if n != 1:
