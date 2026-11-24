@@ -34,3 +34,9 @@ unzip vuzol-site-dist.zip
 ## Власність і передання
 
 Репозиторій належить організації ProMedia-Ukraine. Він не залежить від персонального облікового запису ChatGPT.
+
+## Пошук (SEO)
+
+- Сайт працює на домені `https://vuzol.org.ua/`; саме ця адреса вказана в `canonical`, Open Graph, `robots.txt` і `sitemap.xml`.
+- Альтернативні назви для пошуку («Вузол», «ВУЗОЛ», «Vuzol») записані в невидимому блоці schema.org (`alternateName`) у `<head>`, а також у `<title>` і `meta description`. На самій сторінці їх не видно.
+- Якщо на сайті з'являться нові сторінки, додайте їх у `dist/sitemap.xml`.
