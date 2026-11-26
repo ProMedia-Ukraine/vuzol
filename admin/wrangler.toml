@@ -1,0 +1,15 @@
+# VUZOL admin — Cloudflare Pages project with Functions and a D1 database.
+# Deployed by .github/workflows/deploy-admin.yml; the workflow fills in
+# database_id automatically, so there is nothing to edit here by hand.
+name = "vuzol-admin"
+pages_build_output_dir = "public"
+compatibility_date = "2025-06-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "vuzol-admin"
+database_id = "00000000-0000-0000-0000-000000000000"
+
+[vars]
+GITHUB_REPO = "ProMedia-Ukraine/vuzol"
+GITHUB_BRANCH = "main"

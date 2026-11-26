@@ -35,6 +35,11 @@ jobs:
           test -f "$RUNNER_TEMP/source/dist/index.html"
           mv "$RUNNER_TEMP/source/dist" "$RUNNER_TEMP/public"
 
+      - name: Build team block from content/team.json
+        env:
+          PUBLIC_DIR: ${{ runner.temp }}/public
+        run: python3 .github/scripts/team_block.py
+
       - name: Refresh Instagram materials
         if: ${{ env.INSTAGRAM_ACCESS_TOKEN != '' && env.INSTAGRAM_BUSINESS_ACCOUNT_ID != '' }}
         run: |
