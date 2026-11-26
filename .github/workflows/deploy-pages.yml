@@ -203,6 +203,25 @@ jobs:
           )
           PY
 
+      - name: Install image tools
+        continue-on-error: true
+        run: python3 -m pip install --quiet --break-system-packages pillow
+
+      - name: Polish homepage for search and speed
+        continue-on-error: true
+        env:
+          SITE_URL: https://vuzol.org.ua/
+          PUBLIC_DIR: ${{ runner.temp }}/public
+        run: python3 .github/scripts/seo_polish.py
+
+      - name: Build YouTube video pages
+        continue-on-error: true
+        env:
+          SITE_URL: https://vuzol.org.ua/
+          PUBLIC_DIR: ${{ runner.temp }}/public
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: python3 .github/scripts/youtube_pages.py
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
