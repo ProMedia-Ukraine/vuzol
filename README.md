@@ -35,6 +35,10 @@ unzip vuzol-site-dist.zip
 
 Репозиторій належить організації ProMedia-Ukraine. Він не залежить від персонального облікового запису ChatGPT.
 
+## Команда і адмінка
+
+Склад блоку «Команда» лежить у `content/team.json`, фото — у `content/team/`. Під час публікації скрипт `.github/scripts/team_block.py` вписує команду в сторінку (список у коді `index.html` з архіву більше не використовується). Редагувати команду можна в адмінці за логіном і паролем — див. [admin/README.md](admin/README.md).
+
 ## Сторінки відео з YouTube (автоматично)
 
 Під час кожної публікації (і раз на шість годин) GitHub Actions забирає список відео каналу [@vuzolmedia](https://www.youtube.com/@vuzolmedia) через YouTube Data API і створює:

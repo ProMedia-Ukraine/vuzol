@@ -1,0 +1,88 @@
+{
+  "members": [
+    {
+      "id": "roksolana",
+      "name": "Роксолана Кривенко",
+      "role": "Засновниця й очільниця медіа",
+      "instagram": "https://www.instagram.com/roksolana.kryvenko/",
+      "photo": "roksolana.jpg"
+    },
+    {
+      "id": "olha",
+      "name": "Ольга Мирончук",
+      "role": "Керівниця відділу виробництва текстів",
+      "instagram": "https://www.instagram.com/olia.myronchuk/",
+      "photo": "olha.jpg"
+    },
+    {
+      "id": "kseniia-lazorenko",
+      "name": "Ксенія Лазоренко",
+      "role": "Керівниця відділу відеовиробництва",
+      "instagram": "https://www.instagram.com/ksulazorenko/",
+      "photo": "kseniia-lazorenko.jpg"
+    },
+    {
+      "id": "kseniia-adamenko",
+      "name": "Ксенія Адаменко",
+      "role": "Менеджерка зі співпраць, журналістка",
+      "instagram": "https://www.instagram.com/kseniiaadamenko_/",
+      "photo": "kseniia-adamenko.jpg"
+    },
+    {
+      "id": "yurii",
+      "name": "Юрій Ліщук",
+      "role": "Дизайнер",
+      "instagram": "https://www.instagram.com/lishch_uk/",
+      "photo": "yurii.jpg"
+    },
+    {
+      "id": "diana",
+      "name": "Діана Підцерковна",
+      "role": "Журналістка",
+      "instagram": "https://www.instagram.com/diankaway?igsh=MXUwOXJ1eHpmd3V3bw==",
+      "photo": "diana.jpg"
+    },
+    {
+      "id": "nadiia",
+      "name": "Надія Гордієнко",
+      "role": "Режисерка монтажу",
+      "instagram": "https://www.instagram.com/nadiyka_fm/",
+      "photo": "nadiia.jpg"
+    },
+    {
+      "id": "anastasiia-motruk",
+      "name": "Анастасія Мотрук",
+      "role": "Режисерка монтажу, журналістка",
+      "instagram": "https://www.instagram.com/md.nastyaa/",
+      "photo": "anastasiia-motruk.jpg"
+    },
+    {
+      "id": "polina",
+      "name": "Поліна Ступка",
+      "role": "Журналістка",
+      "instagram": "https://www.instagram.com/pollimzk/",
+      "photo": "polina.jpg"
+    },
+    {
+      "id": "viktoriia",
+      "name": "Вікторія Голотюк",
+      "role": "Журналістка",
+      "instagram": "https://www.instagram.com/_viktoriia_h/",
+      "photo": "viktoriia.jpg"
+    },
+    {
+      "id": "ivanna",
+      "name": "Іванна Сура",
+      "role": "Журналістка",
+      "instagram": "https://www.instagram.com/_ivanka_s__/",
+      "photo": "ivanna.jpg"
+    },
+    {
+      "id": "anastasiia-slichna",
+      "name": "Анастасія Слічна",
+      "role": "Акаунт-менеджерка",
+      "instagram": "https://www.instagram.com/slichna.a/",
+      "photo": "anastasiia-slichna.jpg"
+    }
+  ]
+}
