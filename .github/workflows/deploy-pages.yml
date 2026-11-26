@@ -143,6 +143,66 @@ jobs:
           html.write_text(content, encoding="utf-8")
           PY
 
+      - name: Add analytics and search tags
+        env:
+          SITE_URL: https://vuzol.org.ua/
+          GA_MEASUREMENT_ID: G-S0JW6ZP942
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import datetime, json, os, re
+          site = os.environ["SITE_URL"]
+          ga = os.environ["GA_MEASUREMENT_ID"]
+          public = Path(os.environ["RUNNER_TEMP"]) / "public"
+          html = public / "index.html"
+          content = html.read_text(encoding="utf-8")
+          # Point social previews at the custom domain instead of github.io.
+          content = content.replace("https://promedia-ukraine.github.io/vuzol/", site)
+          ld = {
+              "@context": "https://schema.org",
+              "@graph": [
+                  {"@type": "Organization", "@id": site + "#org", "name": "VUZOL",
+                   "alternateName": ["Вузол", "ВУЗОЛ"], "url": site,
+                   "logo": site + "assets/vuzol-social-preview-v2.jpg"},
+                  {"@type": "WebSite", "@id": site + "#website", "name": "VUZOL",
+                   "alternateName": ["Вузол", "ВУЗОЛ"], "url": site, "inLanguage": "uk",
+                   "description": "Медіа про історію української музики.",
+                   "publisher": {"@id": site + "#org"}},
+              ],
+          }
+          tags = []
+          if "googletagmanager.com/gtag/js" not in content:
+              tags.append(
+                  f'<script async src="https://www.googletagmanager.com/gtag/js?id={ga}"></script>\n'
+                  "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}"
+                  f"gtag('js',new Date());gtag('config','{ga}');</script>"
+              )
+          if 'rel="canonical"' not in content:
+              tags.append(f'<link rel="canonical" href="{site}">')
+          if "application/ld+json" not in content:
+              tags.append('<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False) + "</script>")
+          if tags:
+              block = "\n".join(tags)
+              # Keep <meta charset> first, then add the tags right after it.
+              content, n = re.subn(r"<meta\s+charset=[^>]*>", lambda m: m.group(0) + "\n" + block, content, count=1, flags=re.I)
+              if n != 1:
+                  content, n = re.subn(r"<head(\s[^>]*)?>", lambda m: m.group(0) + "\n" + block, content, count=1, flags=re.I)
+              if n != 1:
+                  raise SystemExit("Cannot locate <head> to inject analytics tags")
+          html.write_text(content, encoding="utf-8")
+          today = datetime.date.today().isoformat()
+          (public / "sitemap.xml").write_text(
+              '<?xml version="1.0" encoding="UTF-8"?>\n'
+              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+              f"  <url><loc>{site}</loc><lastmod>{today}</lastmod></url>\n"
+              "</urlset>\n",
+              encoding="utf-8",
+          )
+          (public / "robots.txt").write_text(
+              f"User-agent: *\nAllow: /\n\nSitemap: {site}sitemap.xml\n", encoding="utf-8"
+          )
+          PY
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
