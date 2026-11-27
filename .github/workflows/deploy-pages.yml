@@ -148,6 +148,31 @@ jobs:
           html.write_text(content, encoding="utf-8")
           PY
 
+      - name: Install layout fixes and photo credits
+        run: |
+          cp .github/scripts/layout-fixes.css "$RUNNER_TEMP/public/assets/layout-fixes.css"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os, re
+          public = Path(os.environ["RUNNER_TEMP"]) / "public"
+          version = os.environ.get("GITHUB_SHA", "current")[:12]
+          html = public / "index.html"
+          content = html.read_text(encoding="utf-8")
+          css = f'<link rel="stylesheet" href="assets/layout-fixes.css?v={version}">'
+          if css not in content:
+              content, n = re.subn(r"</head\s*>", lambda m: css + "\n" + m.group(0), content, count=1, flags=re.I)
+              if n != 1:
+                  raise SystemExit("Cannot locate </head> to inject layout fixes")
+          # Photo credit for «Жниварські вечорниці».
+          content = content.replace(">Фото: Viktoriia<", ">Фото: Вікторія Голотюк<")
+          html.write_text(content, encoding="utf-8")
+          gallery = public / "zhnyvarski" / "index.html"
+          if gallery.exists():
+              g = gallery.read_text(encoding="utf-8")
+              g = g.replace('rel="noreferrer">Viktoriia</a>', 'rel="noreferrer">Вікторія Голотюк</a>')
+              gallery.write_text(g, encoding="utf-8")
+          PY
+
       - name: Add analytics and search tags
         env:
           SITE_URL: https://vuzol.org.ua/
