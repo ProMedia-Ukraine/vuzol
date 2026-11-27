@@ -7,7 +7,8 @@ YOUTUBE_API_KEY secret. Without a key, or if YouTube fails, it does
 nothing and the deploy goes on as before.
 
 Also rewrites sitemap.xml so it lists every page of the site, and points
-the homepage episode cards to the new on-site pages.
+the homepage episode cards to the new on-site pages. The homepage block
+always shows the newest episodes of «Поясни за українську музику».
 
 For local testing: YOUTUBE_FIXTURE=path/to/videos.json skips the API.
 """
@@ -391,6 +392,97 @@ def prepare(raw):
     return videos
 
 
+SERIES_RE = re.compile(r"поясни\s+за\s+українську\s+музику", re.I)
+HOMEPAGE_EPISODES = 3
+
+
+def _word_forms(videos):
+    """Properly-cased word forms seen in descriptions: lowercased -> form.
+
+    YouTube titles are in capitals; descriptions are in normal case, so they
+    tell us which words are names (Кузьма, Івасюк) or abbreviations (ВВ, ABBA).
+    """
+    forms = {}
+    for v in videos:
+        text = v.get("description", "")
+        for sentence in re.split(r"(?<=[.!?…])\s+|\n+", text):
+            words = re.findall(r"[\w’'ʼ-]+", sentence)
+            for i, w in enumerate(words):
+                if i == 0 or not w[:1].isupper():
+                    continue  # sentence starts tell us nothing
+                key = w.lower()
+                if key not in forms or (w.isupper() and len(w) > 1):
+                    forms[key] = w
+    return forms
+
+
+def episode_title(raw_title, forms):
+    """'СКІЛЬКИ КОШТУЄ ЛУК КУЗЬМИ | ПОЯСНИ… #12' -> ('Скільки коштує лук Кузьми', '12')."""
+    m = re.search(r"#\s*(\d+)", raw_title)
+    num = m.group(1) if m else ""
+    title = re.split(r"\s*\|\s*", raw_title)[0].strip() if "|" in raw_title else raw_title.strip()
+    first = True
+
+    def fix(m):
+        nonlocal first
+        w = m.group(0)
+        key = w.lower()
+        was_first, first = first, False
+        if not w.isupper():
+            return w  # words YouTube already has in normal case stay as they are
+        if len(w) == 1:
+            return w if was_first else key  # Й, В, Б
+        if key in forms:
+            return forms[key]
+        if len(w) <= 4 and not re.search(r"[аеєиіїоуюяaeiouy]", key):
+            return w  # abbreviations such as ВВ, КВН
+        return w[:1] + key[1:] if was_first else key
+
+    title = re.sub(r"[\w’'ʼ-]+", fix, title)
+    # Capital letter at the start, after a colon and inside «quotes» (band names).
+    title = re.sub(r"^(\W*)(\w)", lambda m: m.group(1) + m.group(2).upper(), title)
+    title = re.sub(r"([:?!]\s+|«)(\w)", lambda m: m.group(1) + m.group(2).upper(), title)
+    return title, num
+
+
+def build_homepage_episodes(videos):
+    """Rebuild the homepage episode cards from the newest series episodes."""
+    index = PUBLIC / "index.html"
+    content = index.read_text(encoding="utf-8")
+    m = re.search(r'(<div class="episodes-grid">)(.*?)(</div><p class="episodes-more">)', content, re.S)
+    if not m:
+        print("::warning::Homepage episodes block not found, cards not updated")
+        return
+    # Titles the editors wrote by hand for older cards are kept as they are.
+    manual = {}
+    for vid, title in re.findall(r'watch\?v=([\w-]{11})[^>]*>([^<]+)</a></h3>', m.group(2)):
+        manual[vid] = html.unescape(title)
+    for vid, title in re.findall(r'href="video/([\w-]{11})/"[^>]*>([^<]+)</a></h3>', m.group(2)):
+        manual[vid] = html.unescape(title)
+    series = [v for v in videos if SERIES_RE.search(v["title"])] or videos
+    picked = series[:HOMEPAGE_EPISODES]
+    if not picked:
+        return
+    forms = _word_forms(videos)
+    cards, shown = [], []
+    for v in picked:
+        title, num = episode_title(v["title"], forms)
+        title = manual.get(v["id"], title)
+        shown.append(title)
+        tag = f"YouTube · випуск №{num}" if num else "YouTube"
+        href = f"video/{e(v['id'])}/"
+        thumb = f"https://i.ytimg.com/vi/{e(v['id'])}/hqdefault.jpg"
+        cards.append(
+            f'<article class="card"><a class="card-media-link" href="{href}" aria-label="Дивитися випуск «{e(title)}»">'
+            f'<img class="card-media" src="{thumb}" alt="Обкладинка випуску «{e(title)}»" loading="lazy"></a>'
+            f'<span class="tag">{e(tag)}</span>'
+            f'<h3><a class="card-title-link" href="{href}">{e(title)}</a></h3>'
+            f'<a href="{href}">Дивитися випуск</a></article>')
+    content = content[:m.start(2)] + "".join(cards) + content[m.end(2):]
+    index.write_text(content, encoding="utf-8")
+    print("Homepage episodes: " + "; ".join(shown))
+
+
 def link_homepage(videos):
     """Point homepage YouTube links for videos we have pages for to those pages."""
     index = PUBLIC / "index.html"
@@ -454,6 +546,7 @@ def main():
             page.parent.mkdir(parents=True, exist_ok=True)
             page.write_text(video_page(v, others), encoding="utf-8")
         (out / "index.html").write_text(index_page(videos), encoding="utf-8")
+        build_homepage_episodes(videos)
         link_homepage(videos)
         summary = os.environ.get("GITHUB_STEP_SUMMARY")
         if summary:
